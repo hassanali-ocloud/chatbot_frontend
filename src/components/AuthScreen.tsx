@@ -2,10 +2,14 @@ import { useState } from 'react';
 import { signInWithGoogle } from '@/services/firebase';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Sparkles, Chrome, Loader2 } from 'lucide-react';
+import { Sparkles, Chrome, Loader2, Play } from 'lucide-react';
 import { toast } from 'sonner';
 
-export function AuthScreen() {
+type AuthScreenProps = {
+  onDemoMode: () => void;
+};
+
+export function AuthScreen({ onDemoMode }: AuthScreenProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async () => {
@@ -45,7 +49,7 @@ export function AuthScreen() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Button
               onClick={handleSignIn}
               disabled={isLoading}
@@ -63,6 +67,25 @@ export function AuthScreen() {
                   Sign in with Google
                 </>
               )}
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or</span>
+              </div>
+            </div>
+
+            <Button
+              onClick={onDemoMode}
+              variant="outline"
+              size="lg"
+              className="w-full text-base h-12"
+            >
+              <Play className="mr-2 h-5 w-5" />
+              Try Demo Mode
             </Button>
           </div>
 

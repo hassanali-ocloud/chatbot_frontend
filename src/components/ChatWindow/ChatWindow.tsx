@@ -52,28 +52,55 @@ export function ChatWindow() {
   }, [currentMessages]);
 
   const handleSendMessage = async (text: string) => {
-    if (!currentChatId || !user) {
+    if (!currentChatId) {
       toast.error('Please select a chat first');
       return;
     }
 
     setIsLoading(true);
     try {
-      const messagesRef = collection(db, 'chats', currentChatId, 'messages');
-      
-      await addDoc(messagesRef, {
+      // Add user message to local state
+      const userMessage: Message = {
+        id: `msg-${Date.now()}`,
+        chatId: currentChatId,
         author: 'user',
         text,
-        createdAt: serverTimestamp(),
-        userId: user.uid
-      });
+        createdAt: new Date().toISOString()
+      };
+      addMessage(userMessage);
 
-      await sendMessageToBackend(currentChatId, text, user.uid);
+      if (user) {
+        // If authenticated, save to Firestore
+        const messagesRef = collection(db, 'chats', currentChatId, 'messages');
+        await addDoc(messagesRef, {
+          author: 'user',
+          text,
+          createdAt: serverTimestamp(),
+          userId: user.uid
+        });
+        await sendMessageToBackend(currentChatId, text, user.uid);
+      } else {
+        // Demo mode: simulate AI response
+        setTimeout(() => {
+          const demoResponse: Message = {
+            id: `msg-${Date.now()}-response`,
+            chatId: currentChatId,
+            author: 'assistant',
+            text: 'This is a demo response. To get real AI responses, please configure Firebase and connect your backend. See the README for setup instructions.',
+            createdAt: new Date().toISOString()
+          };
+          addMessage(demoResponse);
+          setIsLoading(false);
+        }, 1500);
+        return;
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message. Please check your Firebase configuration.');
     } finally {
-      setIsLoading(false);
+      if (user) {
+        setIsLoading(false);
+      }
     }
   };
 

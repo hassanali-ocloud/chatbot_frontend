@@ -21,6 +21,7 @@ function AppContent() {
   const { user, setUser } = useAuthStore();
   const { setChats, setCurrentChatId, addChat } = useChatStore();
   const [isLoading, setIsLoading] = useState(true);
+  const [demoMode, setDemoMode] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -67,25 +68,37 @@ function AppContent() {
   }, [user, setChats]);
 
   const handleNewChat = async () => {
-    if (!user) return;
-
     try {
-      const chatsRef = collection(db, 'users', user.uid, 'chats');
-      const newChatRef = await addDoc(chatsRef, {
-        title: 'New Chat',
-        lastUpdated: serverTimestamp(),
-        createdAt: serverTimestamp()
-      });
+      if (user) {
+        // Authenticated mode: save to Firestore
+        const chatsRef = collection(db, 'users', user.uid, 'chats');
+        const newChatRef = await addDoc(chatsRef, {
+          title: 'New Chat',
+          lastUpdated: serverTimestamp(),
+          createdAt: serverTimestamp()
+        });
 
-      const chatDocRef = doc(db, 'chats', newChatRef.id);
-      await updateDoc(chatDocRef, {
-        ownerId: user.uid,
-        createdAt: serverTimestamp()
-      }).catch(() => {
-        // Document might not exist yet, that's okay
-      });
+        const chatDocRef = doc(db, 'chats', newChatRef.id);
+        await updateDoc(chatDocRef, {
+          ownerId: user.uid,
+          createdAt: serverTimestamp()
+        }).catch(() => {
+          // Document might not exist yet, that's okay
+        });
 
-      setCurrentChatId(newChatRef.id);
+        setCurrentChatId(newChatRef.id);
+      } else {
+        // Demo mode: create local chat
+        const newChatId = `demo-chat-${Date.now()}`;
+        const newChat: Chat = {
+          id: newChatId,
+          title: 'Demo Chat',
+          lastUpdated: new Date().toISOString(),
+          ownerId: 'demo-user'
+        };
+        addChat(newChat);
+        setCurrentChatId(newChatId);
+      }
       toast.success('New chat created');
     } catch (error) {
       console.error('Error creating chat:', error);
@@ -104,8 +117,8 @@ function AppContent() {
     );
   }
 
-  if (!user) {
-    return <AuthScreen />;
+  if (!user && !demoMode) {
+    return <AuthScreen onDemoMode={() => setDemoMode(true)} />;
   }
 
   return (
