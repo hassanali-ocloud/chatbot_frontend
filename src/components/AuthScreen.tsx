@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { signInWithGoogle } from '@/services/firebase';
+import { useTheme } from '@/hooks/useTheme';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Sparkles, Chrome, Loader2, Play } from 'lucide-react';
+import { Sparkles, Chrome, Loader2, Play, Moon, Sun } from 'lucide-react';
 import { toast } from 'sonner';
 
 type AuthScreenProps = {
@@ -10,6 +11,7 @@ type AuthScreenProps = {
 };
 
 export function AuthScreen({ onDemoMode }: AuthScreenProps) {
+  const { theme, toggleTheme } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async () => {
@@ -32,8 +34,21 @@ export function AuthScreen({ onDemoMode }: AuthScreenProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-secondary/20 to-accent/10">
-      <Card className="w-full max-w-md shadow-2xl border-2">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-secondary/20 to-accent/10 relative">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={toggleTheme}
+        className="absolute top-4 right-4 rounded-full"
+      >
+        {theme === 'dark' ? (
+          <Sun className="h-5 w-5" />
+        ) : (
+          <Moon className="h-5 w-5" />
+        )}
+      </Button>
+      
+      <Card className="w-full max-w-md shadow-2xl border-2 bg-card/95 backdrop-blur-sm">
         <CardHeader className="text-center space-y-4 pb-8">
           <div className="relative inline-block mx-auto">
             <Sparkles className="w-20 h-20 text-primary animate-pulse" />

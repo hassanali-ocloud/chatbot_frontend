@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
 
 export function useTheme() {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+
+  useEffect(() => {
     // Check localStorage first
     const stored = localStorage.getItem('theme');
-    if (stored === 'light' || stored === 'dark') return stored;
-    
-    // Default to dark theme
-    return 'dark';
-  });
+    if (stored === 'light' || stored === 'dark') {
+      setTheme(stored);
+    } else {
+      // Default to dark theme
+      setTheme('dark');
+    }
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
