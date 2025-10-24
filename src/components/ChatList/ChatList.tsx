@@ -1,6 +1,9 @@
-import { Plus, MessageSquare, Trash2 } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useChatStore } from '@/stores/useChatStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { Button } from '../ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
 
@@ -9,7 +12,9 @@ type ChatListProps = {
 };
 
 export function ChatList({ onNewChat }: ChatListProps) {
+  const navigate = useNavigate();
   const { chats, currentChatId, setCurrentChatId } = useChatStore();
+  const { user } = useAuthStore();
 
   return (
     <div className="flex flex-col h-full bg-[hsl(var(--sidebar-background))] text-[hsl(var(--sidebar-foreground))]">
@@ -67,6 +72,25 @@ export function ChatList({ onNewChat }: ChatListProps) {
           )}
         </div>
       </ScrollArea>
+
+      <div className="p-4 border-t border-[hsl(var(--sidebar-border))]">
+        <button
+          onClick={() => navigate('/settings')}
+          className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-[hsl(var(--sidebar-accent))] transition-colors"
+        >
+          <Avatar className="h-9 w-9">
+            <AvatarImage src={user?.photoURL} alt={user?.displayName || 'User'} />
+            <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+              {user?.displayName?.[0]?.toUpperCase() || 'D'}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 text-left">
+            <p className="text-sm font-medium">{user?.displayName || 'Demo User'}</p>
+            <p className="text-xs text-muted-foreground">View Settings</p>
+          </div>
+          <Settings className="h-4 w-4 text-muted-foreground" />
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
 import { auth, db } from './services/firebase';
@@ -8,6 +9,7 @@ import { Header } from './components/Header';
 import { ChatList } from './components/ChatList/ChatList';
 import { ChatWindow } from './components/ChatWindow/ChatWindow';
 import { AuthScreen } from './components/AuthScreen';
+import { Settings } from './pages/Settings';
 import { Toaster } from './components/ui/toaster';
 import { Toaster as Sonner } from './components/ui/sonner';
 import { TooltipProvider } from './components/ui/tooltip';
@@ -122,28 +124,36 @@ function AppContent() {
   }
 
   return (
-    <div className="flex flex-col h-screen">
-      <Header />
-      <div className="flex flex-1 overflow-hidden">
-        <aside className="w-80 border-r border-border flex-shrink-0">
-          <ChatList onNewChat={handleNewChat} />
-        </aside>
-        <main className="flex-1 overflow-hidden">
-          <ChatWindow />
-        </main>
-      </div>
-    </div>
+    <Routes>
+      <Route path="/" element={
+        <div className="flex flex-col h-screen">
+          <Header />
+          <div className="flex flex-1 overflow-hidden">
+            <aside className="w-80 border-r border-border flex-shrink-0">
+              <ChatList onNewChat={handleNewChat} />
+            </aside>
+            <main className="flex-1 overflow-hidden">
+              <ChatWindow />
+            </main>
+          </div>
+        </div>
+      } />
+      <Route path="/settings" element={<Settings />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <AppContent />
-      </TooltipProvider>
+      <BrowserRouter>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <AppContent />
+        </TooltipProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }
