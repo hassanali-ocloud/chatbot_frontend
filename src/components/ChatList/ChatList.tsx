@@ -6,6 +6,8 @@ import { Button } from '../ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
+import { deleteChat as deleteChatAPI } from '@/services/chatService';
+import { toast } from 'sonner';
 
 type ChatListProps = {
   onNewChat: () => void;
@@ -13,8 +15,23 @@ type ChatListProps = {
 
 export function ChatList({ onNewChat }: ChatListProps) {
   const navigate = useNavigate();
-  const { chats, currentChatId, setCurrentChatId } = useChatStore();
+  const { chats, currentChatId, setCurrentChatId, deleteChat } = useChatStore();
   const { user } = useAuthStore();
+
+  const handleDeleteChat = async (chatId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    try {
+      if (user) {
+        await deleteChatAPI(chatId);
+        toast.success('Chat deleted');
+      }
+      deleteChat(chatId);
+    } catch (error) {
+      console.error('Error deleting chat:', error);
+      toast.error('Failed to delete chat');
+    }
+  };
 
   return (
     <div className="flex flex-col h-full bg-[hsl(var(--sidebar-background))] text-[hsl(var(--sidebar-foreground))]">
@@ -52,18 +69,15 @@ export function ChatList({ onNewChat }: ChatListProps) {
                 <div className="flex items-center gap-2">
                   <MessageSquare className="h-4 w-4 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{chat.title}</p>
+                     <p className="text-sm font-medium truncate">{chat.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(chat.lastUpdated).toLocaleDateString()}
+                      {new Date(chat.lastUpdated || chat.last_updated || new Date()).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
                 <button
                   className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-destructive/10 transition-opacity"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // TODO: Implement delete
-                  }}
+                  onClick={(e) => handleDeleteChat(chat.id, e)}
                 >
                   <Trash2 className="h-3 w-3 text-destructive" />
                 </button>

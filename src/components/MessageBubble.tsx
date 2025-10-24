@@ -7,8 +7,8 @@ type MessageBubbleProps = {
 };
 
 export function MessageBubble({ message }: MessageBubbleProps) {
-  const isUser = message.author === 'user';
-  const isAssistant = message.author === 'assistant';
+  const isUser = (message.author || message.role) === 'user';
+  const isAssistant = (message.author || message.role) === 'assistant';
 
   return (
     <div className={cn(
@@ -35,7 +35,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           "text-xs mt-2 opacity-70",
           isUser ? "text-right" : "text-left"
         )}>
-          {new Date(message.createdAt).toLocaleTimeString([], { 
+          {new Date(message.createdAt || message.created_at || new Date()).toLocaleTimeString([], { 
             hour: '2-digit', 
             minute: '2-digit' 
           })}

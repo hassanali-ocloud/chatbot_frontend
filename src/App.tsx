@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
-import { auth, db } from './services/firebase';
+import { auth } from './services/firebase';
 import { useAuthStore } from './stores/useAuthStore';
 import { useChatStore } from './stores/useChatStore';
 import { Header } from './components/Header';
@@ -15,6 +14,7 @@ import { Toaster as Sonner } from './components/ui/sonner';
 import { TooltipProvider } from './components/ui/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { createChat, listChats } from './services/chatService';
 import type { Chat } from './types';
 
 const queryClient = new QueryClient();
@@ -46,49 +46,41 @@ function AppContent() {
   useEffect(() => {
     if (!user) return;
 
-    const chatsRef = collection(db, 'users', user.uid, 'chats');
-    const q = query(chatsRef, orderBy('lastUpdated', 'desc'));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const chats: Chat[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        chats.push({
-          id: doc.id,
-          title: data.title,
-          lastUpdated: data.lastUpdated?.toDate().toISOString() || new Date().toISOString(),
+    const fetchChats = async () => {
+      try {
+        const chats = await listChats();
+        const normalizedChats = chats.map(chat => ({
+          ...chat,
+          lastUpdated: chat.last_updated || chat.lastUpdated || new Date().toISOString(),
           ownerId: user.uid
-        });
-      });
-      setChats(chats);
-    }, (error) => {
-      console.error('Error fetching chats:', error);
-      toast.error('Failed to load chats');
-    });
+        }));
+        setChats(normalizedChats);
+      } catch (error) {
+        console.error('Error fetching chats:', error);
+        toast.error('Failed to load chats');
+      }
+    };
 
-    return () => unsubscribe();
+    fetchChats();
+    
+    // Poll for updates every 5 seconds
+    const interval = setInterval(fetchChats, 5000);
+    return () => clearInterval(interval);
   }, [user, setChats]);
 
   const handleNewChat = async () => {
     try {
       if (user) {
-        // Authenticated mode: save to Firestore
-        const chatsRef = collection(db, 'users', user.uid, 'chats');
-        const newChatRef = await addDoc(chatsRef, {
-          title: 'New Chat',
-          lastUpdated: serverTimestamp(),
-          createdAt: serverTimestamp()
-        });
-
-        const chatDocRef = doc(db, 'chats', newChatRef.id);
-        await updateDoc(chatDocRef, {
-          ownerId: user.uid,
-          createdAt: serverTimestamp()
-        }).catch(() => {
-          // Document might not exist yet, that's okay
-        });
-
-        setCurrentChatId(newChatRef.id);
+        // Authenticated mode: call backend API
+        const newChat = await createChat('New Chat');
+        const normalizedChat: Chat = {
+          ...newChat,
+          lastUpdated: newChat.last_updated || newChat.lastUpdated || new Date().toISOString(),
+          ownerId: user.uid
+        };
+        addChat(normalizedChat);
+        setCurrentChatId(newChat.id);
+        toast.success('New chat created');
       } else {
         // Demo mode: create local chat
         const newChatId = `demo-chat-${Date.now()}`;
@@ -100,8 +92,8 @@ function AppContent() {
         };
         addChat(newChat);
         setCurrentChatId(newChatId);
+        toast.success('Demo chat created');
       }
-      toast.success('New chat created');
     } catch (error) {
       console.error('Error creating chat:', error);
       toast.error('Failed to create new chat');

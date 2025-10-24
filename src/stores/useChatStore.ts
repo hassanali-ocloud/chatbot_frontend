@@ -10,6 +10,7 @@ type ChatState = {
   setMessagesForChat: (chatId: string, msgs: Message[]) => void;
   setCurrentChatId: (id: string | null) => void;
   addChat: (chat: Chat) => void;
+  deleteChat: (chatId: string) => void;
 };
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -17,12 +18,15 @@ export const useChatStore = create<ChatState>((set) => ({
   messages: {},
   currentChatId: null,
   setChats: (c) => set({ chats: c }),
-  addMessage: (msg) => set((s) => ({ 
-    messages: { 
-      ...s.messages, 
-      [msg.chatId]: [...(s.messages[msg.chatId] || []), msg] 
-    } 
-  })),
+  addMessage: (msg) => set((s) => {
+    const chatId = msg.chatId || msg.chat_id || '';
+    return {
+      messages: { 
+        ...s.messages, 
+        [chatId]: [...(s.messages[chatId] || []), msg] 
+      }
+    };
+  }),
   setMessagesForChat: (chatId, msgs) => set((s) => ({ 
     messages: { 
       ...s.messages, 
@@ -30,5 +34,12 @@ export const useChatStore = create<ChatState>((set) => ({
     } 
   })),
   setCurrentChatId: (id) => set({ currentChatId: id }),
-  addChat: (chat) => set((s) => ({ chats: [chat, ...s.chats] }))
+  addChat: (chat) => set((s) => ({ chats: [chat, ...s.chats] })),
+  deleteChat: (chatId) => set((s) => ({
+    chats: s.chats.filter(c => c.id !== chatId),
+    messages: Object.fromEntries(
+      Object.entries(s.messages).filter(([id]) => id !== chatId)
+    ),
+    currentChatId: s.currentChatId === chatId ? null : s.currentChatId
+  }))
 }));

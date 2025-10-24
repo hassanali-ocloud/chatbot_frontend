@@ -1,10 +1,11 @@
 import axios from 'axios';
 import { auth } from './firebase';
 
-const baseURL = import.meta.env.VITE_BACKEND_BASE_URL || window.location.origin;
+const baseURL = import.meta.env.VITE_BACKEND_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = `${baseURL}/api/v1`;
 
 export const api = axios.create({
-  baseURL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json'
   },

@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/services/firebase';
 import { useChatStore } from '@/stores/useChatStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { MessageBubble } from '../MessageBubble';
 import { MessageInput } from '../MessageInput/MessageInput';
-import { sendMessageToBackend } from '@/services/chatService';
+import { getChatMessages, sendMessage } from '@/services/chatService';
 import { ScrollArea } from '../ui/scroll-area';
 import { toast } from 'sonner';
 import { Sparkles, Loader2 } from 'lucide-react';
@@ -23,28 +21,29 @@ export function ChatWindow() {
   useEffect(() => {
     if (!currentChatId || !user) return;
 
-    const messagesRef = collection(db, 'chats', currentChatId, 'messages');
-    const q = query(messagesRef, orderBy('createdAt', 'asc'));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const msgs: Message[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        msgs.push({
-          id: doc.id,
+    const fetchMessages = async () => {
+      try {
+        const msgs = await getChatMessages(currentChatId);
+        const normalizedMsgs: Message[] = msgs.map(msg => ({
+          id: (msg.id || msg._id) as string,
           chatId: currentChatId,
-          author: data.author,
-          text: data.text,
-          createdAt: data.createdAt?.toDate().toISOString() || new Date().toISOString()
-        });
-      });
-      setMessagesForChat(currentChatId, msgs);
-    }, (error) => {
-      console.error('Error fetching messages:', error);
-      toast.error('Failed to load messages');
-    });
+          author: msg.role,
+          role: msg.role,
+          text: msg.text,
+          createdAt: msg.created_at || msg.createdAt || new Date().toISOString()
+        }));
+        setMessagesForChat(currentChatId, normalizedMsgs);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+        toast.error('Failed to load messages');
+      }
+    };
 
-    return () => unsubscribe();
+    fetchMessages();
+    
+    // Poll for new messages every 2 seconds
+    const interval = setInterval(fetchMessages, 2000);
+    return () => clearInterval(interval);
   }, [currentChatId, user, setMessagesForChat]);
 
   useEffect(() => {
@@ -59,26 +58,31 @@ export function ChatWindow() {
 
     setIsLoading(true);
     try {
-      // Add user message to local state
+      // Add user message to local state immediately
       const userMessage: Message = {
         id: `msg-${Date.now()}`,
         chatId: currentChatId,
         author: 'user',
+        role: 'user',
         text,
         createdAt: new Date().toISOString()
       };
       addMessage(userMessage);
 
       if (user) {
-        // If authenticated, save to Firestore
-        const messagesRef = collection(db, 'chats', currentChatId, 'messages');
-        await addDoc(messagesRef, {
-          author: 'user',
-          text,
-          createdAt: serverTimestamp(),
-          userId: user.uid
-        });
-        await sendMessageToBackend(currentChatId, text, user.uid);
+        // Call backend API
+        const response = await sendMessage(currentChatId, text);
+        
+        // Add assistant response
+        const assistantMessage: Message = {
+          id: response.assistant.id || `msg-${Date.now()}-assistant`,
+          chatId: currentChatId,
+          author: 'assistant',
+          role: 'assistant',
+          text: response.assistant.text,
+          createdAt: response.assistant.created_at || response.assistant.createdAt || new Date().toISOString()
+        };
+        addMessage(assistantMessage);
       } else {
         // Demo mode: simulate AI response
         setTimeout(() => {
@@ -86,7 +90,8 @@ export function ChatWindow() {
             id: `msg-${Date.now()}-response`,
             chatId: currentChatId,
             author: 'assistant',
-            text: 'This is a demo response. To get real AI responses, please configure Firebase and connect your backend. See the README for setup instructions.',
+            role: 'assistant',
+            text: 'This is a demo response. To get real AI responses, please sign in and configure your backend.',
             createdAt: new Date().toISOString()
           };
           addMessage(demoResponse);
@@ -96,7 +101,7 @@ export function ChatWindow() {
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error('Failed to send message. Please check your Firebase configuration.');
+      toast.error('Failed to send message');
     } finally {
       if (user) {
         setIsLoading(false);
