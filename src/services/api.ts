@@ -2,7 +2,7 @@ import axios from 'axios';
 import { auth } from './firebase';
 
 const baseURL = import.meta.env.VITE_BACKEND_BASE_URL || 'http://localhost:8000';
-const API_BASE_URL = `${baseURL}/api/v1`;
+const API_BASE_URL = `${baseURL}`;
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
