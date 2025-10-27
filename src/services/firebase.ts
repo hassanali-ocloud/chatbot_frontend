@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'demo-api-key',
@@ -28,6 +28,24 @@ export async function signOut() {
     await firebaseSignOut(auth);
   } catch (error) {
     console.error('Error signing out:', error);
+    throw error;
+  }
+}
+
+export async function signInWithEmail(email: string, password: string) {
+  try {
+    return await signInWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    console.error('Error signing in with email:', error);
+    throw error;
+  }
+}
+
+export async function signUpWithEmail(email: string, password: string) {
+  try {
+    return await createUserWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    console.error('Error signing up with email:', error);
     throw error;
   }
 }
