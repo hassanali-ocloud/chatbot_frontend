@@ -16,6 +16,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { createChat, listChats } from './services/chatService';
 import type { Chat } from './types';
+import { Sheet, SheetContent, SheetTrigger } from './components/ui/sheet';
+import { Menu } from 'lucide-react';
+import { Button } from './components/ui/button';
+import { useIsMobile } from './hooks/use-mobile';
 
 const queryClient = new QueryClient();
 
@@ -24,6 +28,8 @@ function AppContent() {
   const { setChats, setCurrentChatId, addChat } = useChatStore();
   const [isLoading, setIsLoading] = useState(true);
   const [demoMode, setDemoMode] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -119,11 +125,29 @@ function AppContent() {
     <Routes>
       <Route path="/" element={
         <div className="flex flex-col h-screen">
-          <Header />
+          <Header 
+            mobileMenuTrigger={isMobile ? (
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="md:hidden">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="p-0 w-80">
+                  <ChatList onNewChat={() => {
+                    handleNewChat();
+                    setMobileMenuOpen(false);
+                  }} />
+                </SheetContent>
+              </Sheet>
+            ) : undefined}
+          />
           <div className="flex flex-1 overflow-hidden">
-            <aside className="w-80 border-r border-border flex-shrink-0">
-              <ChatList onNewChat={handleNewChat} />
-            </aside>
+            {!isMobile && (
+              <aside className="w-80 border-r border-border flex-shrink-0">
+                <ChatList onNewChat={handleNewChat} />
+              </aside>
+            )}
             <main className="flex-1 overflow-hidden">
               <ChatWindow />
             </main>

@@ -39,7 +39,7 @@ export function AuthScreen({ onDemoMode }: AuthScreenProps) {
         variant="ghost"
         size="icon"
         onClick={toggleTheme}
-        className="absolute top-4 right-4 rounded-full"
+        className="absolute top-4 right-4 rounded-full z-10"
       >
         {theme === 'dark' ? (
           <Sun className="h-5 w-5" />
@@ -48,17 +48,17 @@ export function AuthScreen({ onDemoMode }: AuthScreenProps) {
         )}
       </Button>
       
-      <Card className="w-full max-w-md shadow-2xl border-2 bg-card/95 backdrop-blur-sm">
-        <CardHeader className="text-center space-y-4 pb-8">
+      <Card className="w-full max-w-md shadow-2xl border-2 bg-card/95 backdrop-blur-sm mx-4">
+        <CardHeader className="text-center space-y-4 pb-6 md:pb-8">
           <div className="relative inline-block mx-auto">
-            <Sparkles className="w-20 h-20 text-primary animate-pulse" />
+            <Sparkles className="w-16 h-16 md:w-20 md:h-20 text-primary animate-pulse" />
             <div className="absolute inset-0 blur-2xl bg-primary/30 rounded-full animate-pulse" />
           </div>
           <div>
-            <CardTitle className="text-3xl font-bold mb-2 gradient-text">
+            <CardTitle className="text-2xl md:text-3xl font-bold mb-2 gradient-text">
               AI Chat Assistant
             </CardTitle>
-            <CardDescription className="text-base">
+            <CardDescription className="text-sm md:text-base px-2">
               Experience intelligent conversations powered by cutting-edge AI technology
             </CardDescription>
           </div>

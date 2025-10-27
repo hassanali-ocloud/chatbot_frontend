@@ -13,8 +13,13 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { toast } from 'sonner';
+import { ReactNode } from 'react';
 
-export function Header() {
+type HeaderProps = {
+  mobileMenuTrigger?: ReactNode;
+};
+
+export function Header({ mobileMenuTrigger }: HeaderProps) {
   const user = useAuthStore((s) => s.user);
   const { theme, toggleTheme } = useTheme();
 
@@ -29,15 +34,16 @@ export function Header() {
 
   return (
     <header className="border-b border-border bg-card/50 backdrop-blur-lg sticky top-0 z-50">
-      <div className="flex items-center justify-between px-6 py-3">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between px-3 md:px-6 py-3">
+        <div className="flex items-center gap-2 md:gap-3">
+          {mobileMenuTrigger}
           <div className="relative">
-            <Sparkles className="w-8 h-8 text-primary animate-pulse" />
+            <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-primary animate-pulse" />
             <div className="absolute inset-0 blur-xl bg-primary/20 rounded-full" />
           </div>
           <div>
-            <h1 className="text-xl font-bold gradient-text">AI Chat Assistant</h1>
-            <p className="text-xs text-muted-foreground">Intelligent Conversations</p>
+            <h1 className="text-base md:text-xl font-bold gradient-text">AI Chat Assistant</h1>
+            <p className="text-xs text-muted-foreground hidden sm:block">Intelligent Conversations</p>
           </div>
         </div>
 
