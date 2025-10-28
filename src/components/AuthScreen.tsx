@@ -97,7 +97,7 @@ export function AuthScreen({ onDemoMode }: AuthScreenProps) {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-secondary/20 to-accent/10 relative">
-      <Button
+      {/* <Button
         variant="ghost"
         size="icon"
         onClick={toggleTheme}
@@ -108,7 +108,7 @@ export function AuthScreen({ onDemoMode }: AuthScreenProps) {
         ) : (
           <Moon className="h-5 w-5" />
         )}
-      </Button>
+      </Button> */}
       
       <Card className="w-full max-w-md shadow-2xl border-2 bg-card/95 backdrop-blur-sm mx-4">
         <CardHeader className="text-center space-y-4 pb-6 md:pb-8">
@@ -268,16 +268,16 @@ export function AuthScreen({ onDemoMode }: AuthScreenProps) {
             </TabsContent>
           </Tabs>
 
-          <div className="relative">
+          {/* <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-card px-2 text-muted-foreground">Or</span>
             </div>
-          </div>
+          </div> */}
 
-          <Button
+          {/* <Button
             onClick={onDemoMode}
             variant="outline"
             size="lg"
@@ -285,7 +285,7 @@ export function AuthScreen({ onDemoMode }: AuthScreenProps) {
           >
             <Play className="mr-2 h-5 w-5" />
             Try Demo Mode
-          </Button>
+          </Button> */}
 
           <div className="bg-muted/50 rounded-lg p-4 space-y-2">
             <h3 className="text-sm font-semibold">Features:</h3>
