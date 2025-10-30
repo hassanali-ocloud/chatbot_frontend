@@ -11,6 +11,7 @@ type ChatState = {
   setCurrentChatId: (id: string | null) => void;
   addChat: (chat: Chat) => void;
   deleteChat: (chatId: string) => void;
+  clearAll: () => void;
 };
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -41,5 +42,6 @@ export const useChatStore = create<ChatState>((set) => ({
       Object.entries(s.messages).filter(([id]) => id !== chatId)
     ),
     currentChatId: s.currentChatId === chatId ? null : s.currentChatId
-  }))
+  })),
+  clearAll: () => set({ chats: [], messages: {}, currentChatId: null })
 }));
