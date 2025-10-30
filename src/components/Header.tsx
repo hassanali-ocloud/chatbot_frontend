@@ -1,5 +1,6 @@
 import { LogOut, User, Sparkles, Moon, Sun } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useChatStore } from '@/stores/useChatStore';
 import { signOut } from '@/services/firebase';
 import { useTheme } from '@/hooks/useTheme';
 import { Button } from './ui/button';
@@ -21,11 +22,13 @@ type HeaderProps = {
 
 export function Header({ mobileMenuTrigger }: HeaderProps) {
   const user = useAuthStore((s) => s.user);
+  const clearAll = useChatStore((s) => s.clearAll);
   const { theme, toggleTheme } = useTheme();
 
   const handleSignOut = async () => {
     try {
       await signOut();
+      clearAll();
       toast.success('Signed out successfully');
     } catch (error) {
       toast.error('Failed to sign out');
