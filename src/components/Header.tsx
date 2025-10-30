@@ -51,7 +51,7 @@ export function Header({ mobileMenuTrigger }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
+          {/* <Button
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
@@ -62,7 +62,7 @@ export function Header({ mobileMenuTrigger }: HeaderProps) {
             ) : (
               <Moon className="h-5 w-5" />
             )}
-          </Button>
+          </Button> */}
 
           {user && (
             <DropdownMenu>
