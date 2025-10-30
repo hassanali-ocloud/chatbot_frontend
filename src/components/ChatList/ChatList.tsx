@@ -32,7 +32,7 @@ export function ChatList({ onNewChat }: ChatListProps) {
       toast.error('Failed to delete chat');
     }
   };
-
+ 
   return (
     <div className="flex flex-col h-full bg-[hsl(var(--sidebar-background))] text-[hsl(var(--sidebar-foreground))]">
       <div className="p-4 border-b border-[hsl(var(--sidebar-border))]">
