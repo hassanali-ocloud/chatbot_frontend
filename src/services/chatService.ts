@@ -18,7 +18,7 @@ export async function getChatMessages(chatId: string, limit = 200, order: 'asc' 
   return response.data.messages || [];
 }
 
-export async function sendMessage(chatId: string, text: string): Promise<{ assistant: Message }> {
+export async function sendMessage(chatId: string, text: string): Promise<Message> {
   const clientMessageId = crypto.randomUUID();
   const response = await api.post(`/chats/${chatId}/messages`, {
     text,

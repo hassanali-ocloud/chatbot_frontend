@@ -42,7 +42,7 @@ export function ChatWindow() {
     fetchMessages();
     
     // Poll for new messages every 2 seconds
-    const interval = setInterval(fetchMessages, 2000);
+    const interval = setInterval(fetchMessages, 2000000);
     return () => clearInterval(interval);
   }, [currentChatId, user, setMessagesForChat]);
 
@@ -75,12 +75,12 @@ export function ChatWindow() {
         
         // Add assistant response
         const assistantMessage: Message = {
-          id: response.assistant.id || `msg-${Date.now()}-assistant`,
+          id: response.id || `msg-${Date.now()}-assistant`,
           chatId: currentChatId,
           author: 'assistant',
           role: 'assistant',
-          text: response.assistant.text,
-          createdAt: response.assistant.created_at || response.assistant.createdAt || new Date().toISOString()
+          text: response.text,
+          createdAt: response.created_at || response.createdAt || new Date().toISOString()
         };
         addMessage(assistantMessage);
       } else {

@@ -32,7 +32,7 @@ export function ChatList({ onNewChat }: ChatListProps) {
       toast.error('Failed to delete chat');
     }
   };
-
+ 
   return (
     <div className="flex flex-col h-full bg-[hsl(var(--sidebar-background))] text-[hsl(var(--sidebar-foreground))]">
       <div className="p-4 border-b border-[hsl(var(--sidebar-border))]">
@@ -75,12 +75,15 @@ export function ChatList({ onNewChat }: ChatListProps) {
                     </p>
                   </div>
                 </div>
-                <button
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-destructive/10 transition-opacity"
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={(e) => handleDeleteChat(chat.id, e)}
+                  onKeyDown={(e) => e.key === "Enter" && handleDeleteChat(chat.id, e as any)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-destructive/10 transition-opacity cursor-pointer"
                 >
                   <Trash2 className="h-3 w-3 text-destructive" />
-                </button>
+                </div>
               </button>
             ))
           )}
