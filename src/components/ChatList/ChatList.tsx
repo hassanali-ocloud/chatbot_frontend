@@ -20,7 +20,7 @@ export function ChatList({ onNewChat }: ChatListProps) {
 
   const handleDeleteChat = async (chatId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    
+  
     try {
       if (user) {
         await deleteChatAPI(chatId);
